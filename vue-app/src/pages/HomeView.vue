@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { HomePage } from './home'
+import { SmokingRecordPage } from './smoking'
 </script>
 
 <template>
   <main>
-    <HomePage />
+    <SmokingRecordPage />
   </main>
 </template>
