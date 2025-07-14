@@ -1,3 +1,1 @@
-export { default as HelloWorld } from './components/HelloWorld.vue'
-export { default as TheWelcome } from './components/TheWelcome.vue'
-export { default as WelcomeItem } from './components/WelcomeItem.vue'
+// Empty for now - add shared UI components here when needed

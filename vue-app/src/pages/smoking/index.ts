@@ -1,0 +1,1 @@
+export { default as SmokingRecordPage } from './ui/SmokingRecordPage.vue'
