@@ -7,6 +7,7 @@ import { RouterLink, RouterView } from 'vue-router'
     <h1>喫煙記録アプリ</h1>
     <nav>
       <RouterLink to="/">記録</RouterLink>
+      <RouterLink to="/analytics">分析</RouterLink>
       <RouterLink to="/about">設定</RouterLink>
     </nav>
   </header>
