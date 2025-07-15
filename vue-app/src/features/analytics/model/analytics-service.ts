@@ -69,7 +69,9 @@ export class AnalyticsService implements IAnalyticsService {
     const hourly = new Array(24).fill(0)
     
     this.records.forEach(record => {
-      const hour = record.timestamp.getHours()
+      // JST (UTC+9) に変換
+      const jstTime = new Date(record.timestamp.getTime() + 9 * 60 * 60 * 1000)
+      const hour = jstTime.getUTCHours()
       hourly[hour]++
     })
     
