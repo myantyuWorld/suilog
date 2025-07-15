@@ -1,3 +1,47 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { Line, Bar } from 'vue-chartjs'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js'
+import { useAnalytics } from '../../../features/analytics'
+
+// Chart.js コンポーネントを登録
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+)
+
+const {
+  isLoading,
+  stats,
+  dailyChartData,
+  hourlyChartData,
+  monthlyChartData,
+  chartOptions,
+  hourlyChartOptions
+} = useAnalytics()
+
+// 統計データの展開
+const todayCount = computed(() => stats.value.todayCount)
+const weekCount = computed(() => stats.value.weekCount)
+const monthCount = computed(() => stats.value.monthCount)
+</script>
+
 <template>
   <div class="analytics-page">
     <header class="analytics-header">
@@ -48,49 +92,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { computed } from 'vue'
-import { Line, Bar } from 'vue-chartjs'
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js'
-import { useAnalytics } from '../../../features/analytics'
 
-// Chart.js コンポーネントを登録
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-)
-
-const {
-  isLoading,
-  stats,
-  dailyChartData,
-  hourlyChartData,
-  monthlyChartData,
-  chartOptions,
-  hourlyChartOptions
-} = useAnalytics()
-
-// 統計データの展開
-const todayCount = computed(() => stats.value.todayCount)
-const weekCount = computed(() => stats.value.weekCount)
-const monthCount = computed(() => stats.value.monthCount)
-</script>
 
 <style scoped>
 .analytics-page {
