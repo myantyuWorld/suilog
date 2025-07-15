@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { Line, Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -60,10 +60,9 @@ import {
   BarElement,
   Title,
   Tooltip,
-  Legend,
-  type ChartOptions
+  Legend
 } from 'chart.js'
-import { SmokingRecordManager, type SmokingRecord } from '@/entities/smoking-record'
+import { useAnalytics } from '../../../features/analytics'
 
 // Chart.js コンポーネントを登録
 ChartJS.register(
@@ -77,177 +76,20 @@ ChartJS.register(
   Legend
 )
 
-const records = ref<SmokingRecord[]>([])
+const {
+  isLoading,
+  stats,
+  dailyChartData,
+  hourlyChartData,
+  monthlyChartData,
+  chartOptions,
+  hourlyChartOptions
+} = useAnalytics()
 
-// 統計データ
-const todayCount = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  
-  return records.value.filter(record => {
-    const recordDate = new Date(record.timestamp)
-    recordDate.setHours(0, 0, 0, 0)
-    return recordDate.getTime() === today.getTime()
-  }).length
-})
-
-const weekCount = computed(() => {
-  const weekAgo = new Date()
-  weekAgo.setDate(weekAgo.getDate() - 7)
-  weekAgo.setHours(0, 0, 0, 0)
-  
-  return records.value.filter(record => 
-    record.timestamp >= weekAgo
-  ).length
-})
-
-const monthCount = computed(() => {
-  const monthAgo = new Date()
-  monthAgo.setDate(monthAgo.getDate() - 30)
-  monthAgo.setHours(0, 0, 0, 0)
-  
-  return records.value.filter(record => 
-    record.timestamp >= monthAgo
-  ).length
-})
-
-// 日別データ（過去30日）
-const dailyChartData = computed(() => {
-  const daily = new Map<string, number>()
-  const last30Days = []
-  
-  // 過去30日の日付を生成
-  for (let i = 29; i >= 0; i--) {
-    const date = new Date()
-    date.setDate(date.getDate() - i)
-    const dateStr = date.toISOString().split('T')[0]
-    daily.set(dateStr, 0)
-    last30Days.push(dateStr)
-  }
-  
-  // 記録をカウント
-  records.value.forEach(record => {
-    const dateStr = record.timestamp.toISOString().split('T')[0]
-    if (daily.has(dateStr)) {
-      daily.set(dateStr, daily.get(dateStr)! + 1)
-    }
-  })
-  
-  return {
-    labels: last30Days.map(date => {
-      const d = new Date(date)
-      return `${d.getMonth() + 1}/${d.getDate()}`
-    }),
-    datasets: [{
-      label: '喫煙本数',
-      data: last30Days.map(date => daily.get(date) || 0),
-      borderColor: '#f56565',
-      backgroundColor: 'rgba(245, 101, 101, 0.1)',
-      tension: 0.4,
-      fill: true
-    }]
-  }
-})
-
-// 時間別データ
-const hourlyChartData = computed(() => {
-  const hourly = new Array(24).fill(0)
-  
-  records.value.forEach(record => {
-    const hour = record.timestamp.getHours()
-    hourly[hour]++
-  })
-  
-  return {
-    labels: Array.from({ length: 24 }, (_, i) => `${i}時`),
-    datasets: [{
-      label: '喫煙回数',
-      data: hourly,
-      backgroundColor: 'rgba(72, 187, 120, 0.6)',
-      borderColor: '#48bb78',
-      borderWidth: 1
-    }]
-  }
-})
-
-// 月別データ
-const monthlyChartData = computed(() => {
-  const monthly = new Map<string, number>()
-  
-  // 過去12ヶ月を生成
-  const last12Months = []
-  for (let i = 11; i >= 0; i--) {
-    const date = new Date()
-    date.setMonth(date.getMonth() - i)
-    const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-    monthly.set(monthStr, 0)
-    last12Months.push(monthStr)
-  }
-  
-  // 記録をカウント
-  records.value.forEach(record => {
-    const monthStr = `${record.timestamp.getFullYear()}-${String(record.timestamp.getMonth() + 1).padStart(2, '0')}`
-    if (monthly.has(monthStr)) {
-      monthly.set(monthStr, monthly.get(monthStr)! + 1)
-    }
-  })
-  
-  return {
-    labels: last12Months.map(month => {
-      const [year, m] = month.split('-')
-      return `${year}/${m}`
-    }),
-    datasets: [{
-      label: '月間喫煙本数',
-      data: last12Months.map(month => monthly.get(month) || 0),
-      borderColor: '#4299e1',
-      backgroundColor: 'rgba(66, 153, 225, 0.1)',
-      tension: 0.4,
-      fill: true
-    }]
-  }
-})
-
-// チャートオプション
-const chartOptions: ChartOptions<'line'> = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: false
-    }
-  },
-  scales: {
-    y: {
-      beginAtZero: true,
-      ticks: {
-        stepSize: 1
-      }
-    }
-  }
-}
-
-const hourlyChartOptions: ChartOptions<'bar'> = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: false
-    }
-  },
-  scales: {
-    y: {
-      beginAtZero: true,
-      ticks: {
-        stepSize: 1
-      }
-    }
-  }
-}
-
-onMounted(() => {
-  records.value = SmokingRecordManager.getAll()
-})
+// 統計データの展開
+const todayCount = computed(() => stats.value.todayCount)
+const weekCount = computed(() => stats.value.weekCount)
+const monthCount = computed(() => stats.value.monthCount)
 </script>
 
 <style scoped>
