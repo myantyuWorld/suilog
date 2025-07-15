@@ -13,7 +13,7 @@
 - 統計情報の表示
 
 ### 技術スタック
-- Frontend: Vue with TypeScript
+- Frontend: Vue3 with TypeScript
 - Styling: TailwindCSS v4
 - CI/CD: GitHub Actions
 - Deployment: GitHub Pages
