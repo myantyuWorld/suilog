@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useSmokingRecord } from '../../../features/smoking-record'
+import { useSettings } from '../../../features/settings'
 
 const {
   recentRecords,
@@ -10,6 +12,32 @@ const {
   handleAddRecord,
   handleDeleteRecord
 } = useSmokingRecord()
+
+const { savedData: settings } = useSettings()
+
+// 目標達成状況の計算
+const goalProgress = computed(() => {
+  const dailyGoal = settings.value.dailyGoal
+  const progress = (todayCount.value / dailyGoal) * 100
+  return Math.min(progress, 100)
+})
+
+const goalStatus = computed(() => {
+  const remaining = settings.value.dailyGoal - todayCount.value
+  if (remaining <= 0) {
+    return {
+      type: 'achieved',
+      message: '今日の目標を達成しました！',
+      color: 'text-green-600'
+    }
+  } else {
+    return {
+      type: 'remaining',
+      message: `目標まであと${remaining}本`,
+      color: 'text-orange-600'
+    }
+  }
+})
 </script>
 
 <template>
@@ -17,6 +45,29 @@ const {
     <div class="text-center bg-gray-50 p-8 rounded-lg mb-8">
       <h2 class="text-gray-800 mb-0">今日の喫煙記録</h2>
       <div class="text-5xl font-bold text-red-600 mt-4">{{ todayCount }}本</div>
+      
+      <!-- 目標達成状況 -->
+      <div class="mt-6">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-sm text-gray-600">目標: {{ settings.dailyGoal }}本</span>
+          <span class="text-sm font-medium" :class="goalStatus.color">
+            {{ goalStatus.message }}
+          </span>
+        </div>
+        
+        <!-- プログレスバー -->
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+          <div 
+            class="h-2.5 rounded-full transition-all duration-300"
+            :class="goalStatus.type === 'achieved' ? 'bg-green-600' : 'bg-orange-600'"
+            :style="{ width: goalProgress + '%' }"
+          ></div>
+        </div>
+        
+        <div class="text-xs text-gray-500 mt-1">
+          {{ Math.round(goalProgress) }}% 達成
+        </div>
+      </div>
     </div>
 
     <div class="bg-white p-8 rounded-lg shadow-sm mb-8">
