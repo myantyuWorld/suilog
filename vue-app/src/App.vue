@@ -19,7 +19,7 @@ import { RouterLink, RouterView } from 'vue-router'
         分析
       </RouterLink>
       <RouterLink 
-        to="/about" 
+        to="/settings" 
         class="px-4 py-2 no-underline text-gray-600 rounded transition-colors duration-200 hover:bg-gray-200 router-link-exact-active:bg-blue-600 router-link-exact-active:text-white"
       >
         設定
