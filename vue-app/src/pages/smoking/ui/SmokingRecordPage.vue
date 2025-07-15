@@ -13,71 +13,73 @@ const {
 </script>
 
 <template>
-  <div class="smoking-record-page">
-    <div class="today-stats">
-      <h2>今日の喫煙記録</h2>
-      <div class="count">{{ todayCount }}本</div>
+  <div class="max-w-3xl mx-auto p-8">
+    <div class="text-center bg-gray-50 p-8 rounded-lg mb-8">
+      <h2 class="text-gray-800 mb-0">今日の喫煙記録</h2>
+      <div class="text-5xl font-bold text-red-600 mt-4">{{ todayCount }}本</div>
     </div>
 
-    <div class="record-form">
-      <h3>新しい記録を追加</h3>
+    <div class="bg-white p-8 rounded-lg shadow-sm mb-8">
+      <h3 class="text-gray-800 mb-4">新しい記録を追加</h3>
       <form @submit.prevent="handleAddRecord">
-        <div class="form-group">
-          <label for="location">場所（オプション）</label>
+        <div class="mb-4">
+          <label for="location" class="block mb-2 font-medium">場所（オプション）</label>
           <input 
             id="location"
             v-model="newRecord.location"
             type="text"
             placeholder="例: 自宅、会社、屋外など"
             :disabled="isLoading"
+            class="w-full p-2 border border-gray-300 rounded text-base"
           />
         </div>
         
-        <div class="form-group">
-          <label for="notes">メモ（オプション）</label>
+        <div class="mb-4">
+          <label for="notes" class="block mb-2 font-medium">メモ（オプション）</label>
           <textarea 
             id="notes"
             v-model="newRecord.notes"
             placeholder="気持ちや状況など"
             rows="3"
             :disabled="isLoading"
+            class="w-full p-2 border border-gray-300 rounded text-base"
           ></textarea>
         </div>
         
-        <button type="submit" class="add-button" :disabled="isLoading">
+        <button type="submit" class="bg-blue-600 text-white py-3 px-6 border-0 rounded text-base cursor-pointer transition-colors hover:bg-blue-700 disabled:opacity-50" :disabled="isLoading">
           {{ isLoading ? '追加中...' : '記録を追加' }}
         </button>
       </form>
     </div>
 
-    <div class="records-history">
-      <h3>最近の記録</h3>
-      <div v-if="isLoading" class="loading">
+    <div class="bg-white p-8 rounded-lg shadow-sm">
+      <h3 class="text-gray-800 mb-4">最近の記録</h3>
+      <div v-if="isLoading" class="text-center text-gray-600 p-8">
         読み込み中...
       </div>
-      <div v-else-if="recentRecords.length === 0" class="no-records">
+      <div v-else-if="recentRecords.length === 0" class="text-center text-gray-600 p-8">
         記録がありません
       </div>
-      <div v-else class="records-list">
+      <div v-else class="flex flex-col gap-4">
         <div 
           v-for="record in recentRecords" 
           :key="record.id"
-          class="record-item"
+          class="bg-gray-50 p-4 rounded border-l-4 border-red-600"
         >
-          <div class="record-header">
-            <span class="timestamp">{{ formatDateTime(record.timestamp) }}</span>
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-medium text-gray-800">{{ formatDateTime(record.timestamp) }}</span>
             <button 
               @click="handleDeleteRecord(record.id)"
-              class="delete-button"
+              class="bg-red-600 text-white py-1 px-2 border-0 rounded text-sm cursor-pointer transition-colors hover:bg-red-700 disabled:opacity-50"
               :disabled="isLoading"
             >
               削除
             </button>
           </div>
-          <div v-if="record.location" class="record-location">
+          <div v-if="record.location" class="text-sm text-gray-600 mt-2">
             📍 {{ record.location }}
           </div>
-          <div v-if="record.notes" class="record-notes">
+          <div v-if="record.notes" class="text-sm text-gray-600 mt-2">
             💭 {{ record.notes }}
           </div>
         </div>
@@ -87,133 +89,3 @@ const {
 </template>
 
 
-<style scoped>
-.smoking-record-page {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.today-stats {
-  text-align: center;
-  background-color: #f8f9fa;
-  padding: 2rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
-}
-
-.count {
-  font-size: 3rem;
-  font-weight: bold;
-  color: #dc3545;
-  margin-top: 1rem;
-}
-
-.record-form {
-  background-color: #fff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin-bottom: 2rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.add-button {
-  background-color: #007bff;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.add-button:hover {
-  background-color: #0056b3;
-}
-
-.records-history {
-  background-color: #fff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.no-records,
-.loading {
-  text-align: center;
-  color: #666;
-  padding: 2rem;
-}
-
-.records-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.record-item {
-  background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 4px;
-  border-left: 4px solid #dc3545;
-}
-
-.record-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.timestamp {
-  font-weight: 500;
-  color: #333;
-}
-
-.delete-button {
-  background-color: #dc3545;
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.delete-button:hover {
-  background-color: #c82333;
-}
-
-.record-location,
-.record-notes {
-  font-size: 0.875rem;
-  color: #666;
-  margin-top: 0.5rem;
-}
-
-h2, h3 {
-  margin: 0 0 1rem 0;
-  color: #333;
-}
-</style>
