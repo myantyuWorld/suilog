@@ -1,3 +1,17 @@
+<script setup lang="ts">
+import { useSmokingRecord } from '../../../features/smoking-record'
+
+const {
+  recentRecords,
+  todayCount,
+  isLoading,
+  newRecord,
+  formatDateTime,
+  handleAddRecord,
+  handleDeleteRecord
+} = useSmokingRecord()
+</script>
+
 <template>
   <div class="smoking-record-page">
     <div class="today-stats">
@@ -72,48 +86,6 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useSmokingRecord } from '../../../features/smoking-record'
-
-const {
-  recentRecords,
-  todayCount,
-  isLoading,
-  loadRecords,
-  addRecord,
-  deleteRecord,
-  formatDateTime
-} = useSmokingRecord()
-
-const newRecord = ref({
-  location: '',
-  notes: ''
-})
-
-const handleAddRecord = async () => {
-  await addRecord({
-    timestamp: new Date(),
-    location: newRecord.value.location || undefined,
-    notes: newRecord.value.notes || undefined
-  })
-  
-  newRecord.value = {
-    location: '',
-    notes: ''
-  }
-}
-
-const handleDeleteRecord = async (id: string) => {
-  if (confirm('この記録を削除しますか？')) {
-    await deleteRecord(id)
-  }
-}
-
-onMounted(() => {
-  loadRecords()
-})
-</script>
 
 <style scoped>
 .smoking-record-page {

@@ -1,4 +1,4 @@
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { UserFormService } from '../model/user-form-service'
 import type { UserFormData, CreateUserFormInput, UserFormState } from '../model/types'
 
@@ -19,6 +19,24 @@ export function useUserForm() {
   const isValid = computed(() => {
     const errors = UserFormService.validate(state.data)
     return Object.keys(errors).length === 0
+  })
+
+  const handleSubmit = async () => {
+    const success = await submitForm()
+    if (success) {
+      alert('データが保存されました！')
+    }
+  }
+  
+  const clearData = async () => {
+    const success = await clearSavedData()
+    if (success) {
+      alert('データが削除されました')
+    }
+  }
+  
+  onMounted(() => {
+    loadSavedData()
   })
 
   const loadSavedData = async () => {
@@ -97,6 +115,8 @@ export function useUserForm() {
     submitForm,
     clearSavedData,
     updateField,
-    validateField
+    validateField,
+    handleSubmit,
+    clearData
   }
 }

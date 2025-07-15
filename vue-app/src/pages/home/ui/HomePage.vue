@@ -1,3 +1,18 @@
+<script setup lang="ts">
+import { config } from '../../../shared/config'
+import { formatDate } from '../../../shared/lib/utils'
+import { useUserForm } from '../../../features/user-form'
+
+const {
+  state,
+  savedData,
+  updateField,
+  handleSubmit,
+  clearData
+} = useUserForm()
+
+</script>
+
 <template>
   <div class="home-page">
     <h1>{{ config.app.name }}</h1>
@@ -61,40 +76,6 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { onMounted } from 'vue'
-import { config } from '../../../shared/config'
-import { formatDate } from '../../../shared/lib/utils'
-import { useUserForm } from '../../../features/user-form'
-
-const {
-  state,
-  savedData,
-  isValid,
-  loadSavedData,
-  submitForm,
-  clearSavedData,
-  updateField
-} = useUserForm()
-
-const handleSubmit = async () => {
-  const success = await submitForm()
-  if (success) {
-    alert('データが保存されました！')
-  }
-}
-
-const clearData = async () => {
-  const success = await clearSavedData()
-  if (success) {
-    alert('データが削除されました')
-  }
-}
-
-onMounted(() => {
-  loadSavedData()
-})
-</script>
 
 <style scoped>
 .home-page {

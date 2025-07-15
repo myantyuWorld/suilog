@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { SmokingRecordService } from '../model/smoking-record-service'
 import type { SmokingRecord, CreateSmokingRecordInput } from '../model/types'
 
@@ -13,6 +13,34 @@ export function useSmokingRecord() {
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, 20)
   )
+
+  const newRecord = ref({
+    location: '',
+    notes: ''
+  })
+  
+  const handleAddRecord = async () => {
+    await addRecord({
+      timestamp: new Date(),
+      location: newRecord.value.location || undefined,
+      notes: newRecord.value.notes || undefined
+    })
+    
+    newRecord.value = {
+      location: '',
+      notes: ''
+    }
+  }
+  
+  const handleDeleteRecord = async (id: string) => {
+    if (confirm('この記録を削除しますか？')) {
+      await deleteRecord(id)
+    }
+  }
+  
+  onMounted(() => {
+    loadRecords()
+  })
 
   const loadRecords = async () => {
     isLoading.value = true
@@ -61,9 +89,12 @@ export function useSmokingRecord() {
     recentRecords,
     todayCount,
     isLoading,
+    newRecord,
     loadRecords,
     addRecord,
     deleteRecord,
-    formatDateTime
+    formatDateTime,
+    handleAddRecord,
+    handleDeleteRecord
   }
 }
