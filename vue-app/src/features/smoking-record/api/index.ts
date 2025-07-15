@@ -1,0 +1,1 @@
+export { useSmokingRecord } from './use-smoking-record'

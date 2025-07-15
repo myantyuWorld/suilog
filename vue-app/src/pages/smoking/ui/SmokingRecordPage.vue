@@ -7,7 +7,7 @@
 
     <div class="record-form">
       <h3>新しい記録を追加</h3>
-      <form @submit.prevent="addRecord">
+      <form @submit.prevent="handleAddRecord">
         <div class="form-group">
           <label for="location">場所（オプション）</label>
           <input 
@@ -15,6 +15,7 @@
             v-model="newRecord.location"
             type="text"
             placeholder="例: 自宅、会社、屋外など"
+            :disabled="isLoading"
           />
         </div>
         
@@ -25,29 +26,36 @@
             v-model="newRecord.notes"
             placeholder="気持ちや状況など"
             rows="3"
+            :disabled="isLoading"
           ></textarea>
         </div>
         
-        <button type="submit" class="add-button">記録を追加</button>
+        <button type="submit" class="add-button" :disabled="isLoading">
+          {{ isLoading ? '追加中...' : '記録を追加' }}
+        </button>
       </form>
     </div>
 
     <div class="records-history">
       <h3>最近の記録</h3>
-      <div v-if="records.length === 0" class="no-records">
+      <div v-if="isLoading" class="loading">
+        読み込み中...
+      </div>
+      <div v-else-if="recentRecords.length === 0" class="no-records">
         記録がありません
       </div>
       <div v-else class="records-list">
         <div 
-          v-for="record in records" 
+          v-for="record in recentRecords" 
           :key="record.id"
           class="record-item"
         >
           <div class="record-header">
             <span class="timestamp">{{ formatDateTime(record.timestamp) }}</span>
             <button 
-              @click="deleteRecord(record.id)"
+              @click="handleDeleteRecord(record.id)"
               class="delete-button"
+              :disabled="isLoading"
             >
               削除
             </button>
@@ -65,25 +73,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { SmokingRecordManager, type SmokingRecord } from '@/entities/smoking-record'
+import { ref, onMounted } from 'vue'
+import { useSmokingRecord } from '../../../features/smoking-record'
 
-const records = ref<SmokingRecord[]>([])
+const {
+  recentRecords,
+  todayCount,
+  isLoading,
+  loadRecords,
+  addRecord,
+  deleteRecord,
+  formatDateTime
+} = useSmokingRecord()
+
 const newRecord = ref({
   location: '',
   notes: ''
 })
 
-const todayCount = computed(() => SmokingRecordManager.getTodayCount())
-
-const loadRecords = () => {
-  records.value = SmokingRecordManager.getAll()
-    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-    .slice(0, 20)
-}
-
-const addRecord = () => {
-  SmokingRecordManager.add({
+const handleAddRecord = async () => {
+  await addRecord({
     timestamp: new Date(),
     location: newRecord.value.location || undefined,
     notes: newRecord.value.notes || undefined
@@ -93,24 +102,12 @@ const addRecord = () => {
     location: '',
     notes: ''
   }
-  
-  loadRecords()
 }
 
-const deleteRecord = (id: string) => {
+const handleDeleteRecord = async (id: string) => {
   if (confirm('この記録を削除しますか？')) {
-    SmokingRecordManager.delete(id)
-    loadRecords()
+    await deleteRecord(id)
   }
-}
-
-const formatDateTime = (date: Date): string => {
-  return date.toLocaleDateString('ja-JP', {
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric'
-  })
 }
 
 onMounted(() => {
@@ -189,7 +186,8 @@ onMounted(() => {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.no-records {
+.no-records,
+.loading {
   text-align: center;
   color: #666;
   padding: 2rem;

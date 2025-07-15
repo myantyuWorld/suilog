@@ -10,32 +10,38 @@
           <label for="name">名前:</label>
           <input 
             id="name" 
-            v-model="formData.name" 
+            :value="state.data.name"
+            @input="updateField('name', ($event.target as HTMLInputElement).value)"
             type="text" 
             placeholder="名前を入力"
             required
           />
+          <span v-if="state.errors.name" class="error">{{ state.errors.name }}</span>
         </div>
         
         <div class="form-group">
           <label for="email">メール:</label>
           <input 
             id="email" 
-            v-model="formData.email" 
+            :value="state.data.email"
+            @input="updateField('email', ($event.target as HTMLInputElement).value)"
             type="email" 
             placeholder="メールアドレスを入力"
             required
           />
+          <span v-if="state.errors.email" class="error">{{ state.errors.email }}</span>
         </div>
         
         <div class="form-group">
           <label for="message">メッセージ:</label>
           <textarea 
             id="message" 
-            v-model="formData.message" 
+            :value="state.data.message"
+            @input="updateField('message', ($event.target as HTMLTextAreaElement).value)"
             placeholder="メッセージを入力"
             required
           ></textarea>
+          <span v-if="state.errors.message" class="error">{{ state.errors.message }}</span>
         </div>
         
         <button type="submit">送信</button>
@@ -56,56 +62,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { config } from '../../../shared/config'
-import { localStorageService } from '../../../shared/lib/storage'
 import { formatDate } from '../../../shared/lib/utils'
+import { useUserForm } from '../../../features/user-form'
 
-interface FormData {
-  name: string
-  email: string
-  message: string
-  createdAt: Date
-}
+const {
+  state,
+  savedData,
+  isValid,
+  loadSavedData,
+  submitForm,
+  clearSavedData,
+  updateField
+} = useUserForm()
 
-const formData = ref({
-  name: '',
-  email: '',
-  message: ''
-})
-
-const savedData = ref<FormData | null>(null)
-
-const loadSavedData = () => {
-  const data = localStorageService.get<FormData>('user-form')
-  if (data) {
-    savedData.value = data
+const handleSubmit = async () => {
+  const success = await submitForm()
+  if (success) {
+    alert('データが保存されました！')
   }
 }
 
-const handleSubmit = () => {
-  const dataToSave: FormData = {
-    ...formData.value,
-    createdAt: new Date()
+const clearData = async () => {
+  const success = await clearSavedData()
+  if (success) {
+    alert('データが削除されました')
   }
-  
-  localStorageService.set('user-form', dataToSave)
-  loadSavedData()
-  
-  // フォームをリセット
-  formData.value = {
-    name: '',
-    email: '',
-    message: ''
-  }
-  
-  alert('データが保存されました！')
-}
-
-const clearData = () => {
-  localStorageService.remove('user-form')
-  savedData.value = null
-  alert('データが削除されました')
 }
 
 onMounted(() => {
@@ -177,5 +160,12 @@ button:hover {
 
 .data-item p {
   margin: 0.5rem 0;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
 }
 </style>
