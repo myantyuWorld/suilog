@@ -19,6 +19,11 @@ const router = createRouter({
       name: 'analytics',
       component: () => import('../../pages/analytics/ui/AnalyticsPage.vue'),
     },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('../../pages/settings/ui/SettingsPage.vue'),
+    },
   ],
 })
 
